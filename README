@@ -1,0 +1,4 @@
+git clone to your home directory
+
+add to .bash_profile (or .profile)
+. ~/svn-bash/modules

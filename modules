@@ -1,0 +1,68 @@
+
+isinmod() {
+  local mod=`echo \`pwd\` | sed s/^.*\\\/modules\\\/optional\\\/\[^\\\/\]*$// | sed s/^.*\\\/modules\\\/custom\\\/\[^\\\/\]*$// | sed s/^.*\\\/modules\\\/core$//`
+  if [ -n "$mod" ]; then
+    return 1
+  fi
+  return 0
+}
+
+svnsw() {
+  local path=`svn info | grep URL: | cut -d\  -f2 | sed s/svn:\\\/\\\/svn\[\-a-z\]*\.pre/^/ | sed s/\\\/\[^\\\/\]*$/\\\/$1/`
+  svn switch $path
+}
+svnro() {
+  svn switch --relocate svn://svn.pre svn://svn-readonly.pre
+  svnsw $1
+}
+svnrw() {
+  svn switch --relocate svn://svn-readonly.pre svn://svn.pre
+  svnsw $1
+}
+modup() {
+#  if [ -n isinmod ]; then
+#    echo "modup can only be from from a submodule folder"
+#    return 1
+#  fi
+  local mod=`basename \`pwd\``
+  local exts=`svn propget svn:externals ../`
+
+  local modext=`echo -e "$exts" | \
+    sed s/\\\/$mod\\\/\[^\\\/\]*$/\\\/$mod\\\/$1/ | \
+    sed s/^$mod\ svn:\\\/\\\/svn.pre/$mod\ svn:\\\/\\\/svn-readonly.pre/ `
+  echo -e "$modext" | svn propset svn:externals --file - ../
+  
+  ## Show Diff
+  echo -e "$exts" > .__ext1.tmp
+  echo -e "$modext" > .__ext2.tmp
+  local changes=`diff .__ext1.tmp .__ext2.tmp`
+  echo -e "$changes"
+  rm .__ext1.tmp .__ext2.tmp
+  if [ -n "$changes" ]; then
+    if [ "$2" = "-c" ]; then
+      svn commit -m "Update $mod to version $1" ../
+    fi
+    ## Switch to version without needing to run update 
+    svnro $1
+  fi
+}
+
+getlatest() {
+   local path=`svn info | grep URL: | cut -d\  -f2 |  sed s/\\\/\[^\\\/\]*$/\\\//`
+   local versions=""
+   # loop through all numeric version
+   for v in `svn ls $path | grep -e "^[0-9]*\.[0-9]*\/$"`
+   do
+     # strip /
+     v=${v%%/}
+     # add sortable padding to minor version and append to version
+     versions=`printf "%s\n%d.%010d" "$versions" "${v%%.*}" "${v##*.}"`
+   done
+   # Sort, get last, remove sort padding
+   echo -e "$versions" | sort -n - | tail -n 1 | sed "s/\([0-9]*\)\.0*\([1-9][0-9]*\)/\1.\2/"  
+}
+
+modversion() {
+   local version=`svn info | grep URL: | cut -d\  -f2 |  sed "s/^.*\\\/\([^\\\/]*\)$/\1/"`
+   echo "$version(current) -> `getlatest`(latest)"
+}

@@ -40,7 +40,7 @@ modup() {
   rm .__ext1.tmp .__ext2.tmp
   if [ -n "$changes" ]; then
     if [ "$2" = "-c" ]; then
-      svn commit -m "Update $mod to version $1" ../
+      svn commit --depth empty -m "Update $mod to version $1" ../
     fi
     ## Switch to version without needing to run update 
     svnro $1
@@ -65,4 +65,13 @@ getlatest() {
 modversion() {
    local version=`svn info | grep URL: | cut -d\  -f2 |  sed "s/^.*\\\/\([^\\\/]*\)$/\1/"`
    echo "$version(current) -> `getlatest`(latest)"
+}
+
+modadd() {
+  ext=`svn propget svn:externals .`
+  ext=`printf "%s\n%s svn://svn-readonly.pre/taipan/modules/optional/%s/%s" "$ext" "$1" "$1" "$2"|sort`
+  ext=`svn propset svn:externals "$ext" .`
+  if [ "$3" = "-c" ]; then
+     svn commit --depth empty . -m "Added Module: $1 v$2"
+  fi
 }

@@ -5,35 +5,20 @@ add to .bash_profile (or .profile)
 
 Functions Provide
 
-modversion
-example
-formdata:$ modversion
-result
-> 1.20(current) -> 1.24(latest)
+#### Add, Update and Create module
 
-modup <version> [-c]
+**modadd** <mod> <version>
+**modup** <version>
+**modnew** <mod>
 
-<version>: version number
--c: [optional] commit the update to the current project
+#### Switch between Read-Write and Read-Only versions
 
-example
-formdata:$ modup 1.24 -c
-property 'svn:externals' set on '..'
-11c11
-< formdata svn://svn-readonly.pre/taipan/modules/optional/formdata/1.20
----
-> formdata svn://svn-readonly.pre/taipan/modules/optional/formdata/1.24
-U    enquiryform.info
-Updated to revision 31660.
-Commit Successful
+**modrw** <version>
+**modro** <version>
+
+#### Get information about module version
+
+**modlatest**
+**modversion**
 
 
-svnrw <version>
-
-eg.
-formdata:$ modup trunk
-
-
-svnro <version>
-
-formdata:$ svnro 1.24 

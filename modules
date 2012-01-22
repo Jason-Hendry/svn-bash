@@ -75,3 +75,12 @@ modadd() {
      svn commit --depth empty . -m "Added Module: $1 v$2"
   fi
 }
+
+newmodule() {
+  svn mkdir svn://svn.pre/taipan/modules/optional/$1 -m "Create new module: $1"
+  svn mkdir svn://svn.pre/taipan/modules/optional/$1/trunk -m "Create trunk branch"
+  modadd $1 trunk
+  svn update
+  cd $1
+  svnrw $1 trunk
+}

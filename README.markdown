@@ -7,14 +7,14 @@ Functions Provide
 
 #### Add, Update and Create module
 
-- **modadd** <mod> <version>
-- **modup** <version>
-- **modnew** <mod>
+- **modadd** &lt;mod> &lt;version>
+- **modup** &lt;version>
+- **modnew** &lt;mod>
 
 #### Switch between Read-Write and Read-Only versions
 
-- **modrw** <version>
-- **modro** <version>
+- **modrw** &lt;version>
+- **modro** &lt;version>
 
 #### Get information about module version
 

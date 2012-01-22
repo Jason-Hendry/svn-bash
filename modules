@@ -1,5 +1,5 @@
 
-isinmod() {
+modis() {
   local mod=`echo \`pwd\` | sed s/^.*\\\/modules\\\/optional\\\/\[^\\\/\]*$// | sed s/^.*\\\/modules\\\/custom\\\/\[^\\\/\]*$// | sed s/^.*\\\/modules\\\/core$//`
   if [ -n "$mod" ]; then
     return 1
@@ -7,20 +7,20 @@ isinmod() {
   return 0
 }
 
-svnsw() {
+modsw() {
   local path=`svn info | grep URL: | cut -d\  -f2 | sed s/svn:\\\/\\\/svn\[\-a-z\]*\.pre/^/ | sed s/\\\/\[^\\\/\]*$/\\\/$1/`
   svn switch $path
 }
-svnro() {
+modro() {
   svn switch --relocate svn://svn.pre svn://svn-readonly.pre
-  svnsw $1
+  modsw $1
 }
-svnrw() {
+modrw() {
   svn switch --relocate svn://svn-readonly.pre svn://svn.pre
-  svnsw $1
+  modsw $1
 }
 modup() {
-#  if [ -n isinmod ]; then
+#  if [ -n modis ]; then
 #    echo "modup can only be from from a submodule folder"
 #    return 1
 #  fi
@@ -43,11 +43,11 @@ modup() {
       svn commit --depth empty -m "Update $mod to version $1" ../
     fi
     ## Switch to version without needing to run update 
-    svnro $1
+    modro $1
   fi
 }
 
-getlatest() {
+modlatest() {
    local path=`svn info | grep URL: | cut -d\  -f2 |  sed s/\\\/\[^\\\/\]*$/\\\//`
    local versions=""
    # loop through all numeric version
@@ -76,11 +76,11 @@ modadd() {
   fi
 }
 
-newmodule() {
+modnew() {
   svn mkdir svn://svn.pre/taipan/modules/optional/$1 -m "Create new module: $1"
   svn mkdir svn://svn.pre/taipan/modules/optional/$1/trunk -m "Create trunk branch"
   modadd $1 trunk
   svn update
   cd $1
-  svnrw $1 trunk
+  modrw $1 trunk
 }
